@@ -88,7 +88,12 @@ export default function App() {
         </div>
         <div className="topbar-actions">
           <LiveChip label="Live" />
-          <a className="github-link" href="https://github.com/" rel="noreferrer" target="_blank">
+          <a
+            className="github-link"
+            href="https://github.com/ChurchillonData/SEC-Risk-Analyzer"
+            rel="noreferrer"
+            target="_blank"
+          >
             <Github size={17} />
             GitHub
           </a>
