@@ -17,13 +17,20 @@ The project keeps a professional folder structure without overengineering. Each 
 
 ## Screenshots
 
-**Dashboard**
-
-![EDGAR RiskLens dashboard](docs/screenshots/dashboard.png)
-
-**Completed Microsoft 10-K analysis**
-
-![EDGAR RiskLens completed analysis](docs/screenshots/analysis.png)
+<table>
+  <tr>
+    <td width="50%">
+      <strong>Dashboard</strong>
+      <br />
+      <img src="docs/screenshots/dashboard.png" alt="EDGAR RiskLens dashboard" width="100%" />
+    </td>
+    <td width="50%">
+      <strong>Completed Microsoft 10-K analysis</strong>
+      <br />
+      <img src="docs/screenshots/analysis.png" alt="EDGAR RiskLens completed analysis" width="100%" />
+    </td>
+  </tr>
+</table>
 
 ## What It Does
 
