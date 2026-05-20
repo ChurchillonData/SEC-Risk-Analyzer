@@ -1424,6 +1424,41 @@ td > span {
   animation: pulse 1.2s ease-in-out infinite;
 }
 
+.analysis-loading-copy {
+  max-width: 620px;
+  margin-bottom: 14px;
+}
+
+.analysis-loading-copy strong {
+  display: block;
+  color: #101828;
+  font-size: 1rem;
+  font-weight: 850;
+}
+
+.analysis-loading-copy p {
+  margin: 6px 0 0;
+  color: #667085;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.loading-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.loading-steps span {
+  padding: 5px 9px;
+  border-radius: 999px;
+  color: #175cd3;
+  background: #eff8ff;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
 .skeleton-line,
 .skeleton-block,
 .skeleton-summary,

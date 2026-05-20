@@ -174,7 +174,18 @@ export function EmptyState({
 export function AnalysisSkeleton() {
   return (
     <section className="analysis-card skeleton-card" aria-label="Loading analysis">
-      <div className="skeleton-line wide" />
+      <div className="analysis-loading-copy">
+        <strong>Fetching live SEC filing data...</strong>
+        <p>
+          EDGAR RiskLens is downloading the filing, parsing risk sections, and building cited
+          evidence from the source document.
+        </p>
+      </div>
+      <div className="loading-steps" aria-label="Analysis progress">
+        <span>SEC fetch</span>
+        <span>Section parsing</span>
+        <span>Evidence scoring</span>
+      </div>
       <div className="metric-grid">
         <div className="skeleton-block" />
         <div className="skeleton-block" />
