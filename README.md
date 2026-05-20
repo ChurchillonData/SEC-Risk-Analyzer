@@ -11,6 +11,7 @@ The project keeps a professional folder structure without overengineering. Each 
 
 ## Technical Documentation
 
+- **Technical report PDF:** [docs/technical-report.pdf](docs/technical-report.pdf)
 - **Technical report:** [docs/technical-report.md](docs/technical-report.md)
 - **Architecture notes:** [docs/architecture.md](docs/architecture.md)
 

@@ -122,6 +122,13 @@ Important functions:
 - `FinancialTextAnalyzer._risk_category_scores(...)`
 - `FinancialTextAnalyzer._section_analyses(...)`
 
+Short implementation example:
+
+```python
+risk_score = round((risk_total / token_total) * 1000, 4)
+uncertainty_score = round((uncertainty_total / token_total) * 1000, 4)
+```
+
 ## 7. Risk Categories
 
 The project goes beyond one generic risk score by grouping risk into business themes:
@@ -179,6 +186,19 @@ Important functions:
 
 The pipeline still checks SEC metadata first. That means the app does not blindly return stale data; it first asks SEC what the latest filing is, then checks whether that exact filing is already cached.
 
+Short implementation example:
+
+```python
+metadata = self.ingestor.get_latest_metadata(ticker, form_type)
+cached_result = self.store.get_analysis(
+    metadata.ticker,
+    metadata.form_type,
+    metadata.accession_number,
+)
+if cached_result:
+    return cached_result
+```
+
 ## 11. Pipeline Flow
 
 The main backend workflow is handled by `FilingAnalysisService`.
@@ -211,7 +231,40 @@ analyze_risk_trend(ticker, form_types, limit)
 
 This keeps the backend readable while still showing real system design: ingestion, parsing, NLP, explanation, caching, and API response formatting are separate concerns.
 
-## 12. Frontend Design
+## 12. Selected Implementation Snippets
+
+These snippets are intentionally short. They show the core engineering ideas without forcing readers to inspect the full codebase first.
+
+Clean SEC HTML into readable text:
+
+```python
+soup = BeautifulSoup(html_or_text, "html.parser")
+for tag in soup(["script", "style", "noscript"]):
+    tag.decompose()
+
+text = soup.get_text(separator=" ").replace("\xa0", " ")
+clean_text = re.sub(r"\s+", " ", text).strip()
+```
+
+Build a direct SEC archive URL:
+
+```python
+cik_without_padding = str(int(cik))
+accession_without_dashes = accession_number.replace("-", "")
+document_url = (
+    f"{sec_www_base_url}/Archives/edgar/data/"
+    f"{cik_without_padding}/{accession_without_dashes}/{primary_document}"
+)
+```
+
+Return chart points in chronological order:
+
+```python
+points.sort(key=lambda point: point.filed_at)
+return RiskTrendResponse(ticker=ticker.upper().strip(), points=points)
+```
+
+## 13. Frontend Design
 
 The frontend is a React + TypeScript dashboard. It is intentionally built as a product interface rather than a notebook output.
 
@@ -228,7 +281,7 @@ Key UI features:
 
 The UI is designed to make the analysis easy to scan. The system does not force users to read raw JSON or long terminal output.
 
-## 13. Engineering Decisions
+## 14. Engineering Decisions
 
 The most important decisions are:
 
@@ -242,7 +295,7 @@ The most important decisions are:
 
 These choices make the project stronger as an engineering portfolio piece. It demonstrates data access, backend design, NLP, explainability, caching, testing, deployment, and frontend presentation without becoming unnecessarily complex.
 
-## 14. Limitations
+## 15. Limitations
 
 The current model is a transparent baseline, not a final financial model.
 
@@ -256,7 +309,7 @@ Known limitations:
 
 These limitations are acceptable because the project prioritizes an understandable end-to-end system. Future versions could add FinBERT, labeled evaluation data, raw filing caching, or a Postgres-backed production storage layer.
 
-## 15. Summary
+## 16. Summary
 
 EDGAR RiskLens is a practical financial NLP system that turns public SEC filings into explainable risk intelligence. It does not hide behind a black-box score. It shows the filing, the score, the evidence terms, the risk categories, the sections, and the excerpts.
 
