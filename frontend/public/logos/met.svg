@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-label="MetLife logo fallback">
+  <rect width="160" height="160" rx="30" fill="#ffffff"/>
+  <path d="M28 108 66 52l28 56z" fill="#0066b3"/>
+  <path d="M67 108 104 52l28 56z" fill="#79be20"/>
+  <text x="80" y="132" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#1f2937">MetLife</text>
+</svg>

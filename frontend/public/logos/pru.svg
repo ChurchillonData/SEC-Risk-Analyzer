@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-label="Prudential logo fallback">
+  <rect width="160" height="160" rx="30" fill="#0b4ea2"/>
+  <path d="M80 28 120 78 80 132 40 78z" fill="#fff"/>
+  <path d="M80 50 101 79 80 110 59 79z" fill="#0b4ea2"/>
+  <text x="80" y="148" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" fill="#fff">PRU</text>
+</svg>

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-label="PayPal logo fallback">
+  <rect width="160" height="160" rx="30" fill="#ffffff"/>
+  <path d="M55 36h45c22 0 33 12 29 31-4 20-18 31-41 31H67l-7 31H35z" fill="#003087"/>
+  <path d="M70 55h42c20 0 30 12 26 30-4 19-18 30-39 30H77l-6 27H48z" fill="#009cde" opacity=".9"/>
+</svg>

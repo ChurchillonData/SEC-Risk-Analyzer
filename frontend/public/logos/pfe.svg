@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-label="Pfizer logo fallback">
+  <rect width="160" height="160" rx="30" fill="#ffffff"/>
+  <ellipse cx="80" cy="80" rx="55" ry="36" transform="rotate(-22 80 80)" fill="#0072ce"/>
+  <text x="80" y="91" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#fff">Pfizer</text>
+</svg>

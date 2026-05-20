@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-label="Merck logo fallback">
+  <rect width="160" height="160" rx="30" fill="#007a73"/>
+  <circle cx="80" cy="80" r="42" fill="none" stroke="#fff" stroke-width="9"/>
+  <text x="80" y="91" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="700" fill="#fff">Merck</text>
+</svg>
