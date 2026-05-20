@@ -4,6 +4,15 @@ A focused full-stack project that analyzes public SEC filings for sentiment, unc
 
 The project keeps a professional folder structure without overengineering. Each backend folder has one clear job, and the code is meant to be readable for beginner-to-mid-level developers.
 
+## Live Demo
+
+- **Website:** [https://edgar-risklens.netlify.app](https://edgar-risklens.netlify.app)
+- **Backend health check:** [https://edgar-risklens-api.onrender.com/health](https://edgar-risklens-api.onrender.com/health)
+
+## Screenshots
+
+![EDGAR RiskLens dashboard](docs/screenshots/dashboard.png)
+
 ## What It Does
 
 - Fetches the latest SEC filing for a ticker.
