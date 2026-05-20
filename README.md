@@ -11,7 +11,13 @@ The project keeps a professional folder structure without overengineering. Each 
 
 ## Screenshots
 
+**Dashboard**
+
 ![EDGAR RiskLens dashboard](docs/screenshots/dashboard.png)
+
+**Completed Microsoft 10-K analysis**
+
+![EDGAR RiskLens completed analysis](docs/screenshots/analysis.png)
 
 ## What It Does
 
