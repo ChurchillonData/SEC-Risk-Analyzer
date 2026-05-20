@@ -117,34 +117,31 @@ export function AnalysisDashboard({
 
       <RiskTrendChart error={trendError} isLoading={isTrendLoading} trend={trend} />
 
-      <RiskFrameworkPanel result={result} />
+      <RiskFrameworkPanel groupedTerms={groupedTerms} result={result} />
 
-      <section className="insight-grid">
-        <section className="excerpts-panel">
-          <div className="panel-title-row">
-            <h2>Cited Excerpts</h2>
-            <span>{result.evidence_excerpts.length} found</span>
-          </div>
-          <div className="excerpt-list">
-            {displayedExcerpts.map((excerpt) => (
-              <EvidenceExcerptCard
-                documentUrl={result.document_url}
-                excerpt={excerpt}
-                key={excerpt.id}
-              />
-            ))}
-          </div>
-          {result.evidence_excerpts.length > 3 ? (
-            <button
-              className="show-more-button"
-              onClick={() => setShowAllExcerpts((currentValue) => !currentValue)}
-              type="button"
-            >
-              {showAllExcerpts ? "Show fewer excerpts" : "Show all excerpts"}
-            </button>
-          ) : null}
-        </section>
-        <EvidenceTermsPanel groupedTerms={groupedTerms} />
+      <section className="excerpts-panel excerpts-panel-wide">
+        <div className="panel-title-row">
+          <h2>Cited Excerpts</h2>
+          <span>{result.evidence_excerpts.length} found</span>
+        </div>
+        <div className="excerpt-list">
+          {displayedExcerpts.map((excerpt) => (
+            <EvidenceExcerptCard
+              documentUrl={result.document_url}
+              excerpt={excerpt}
+              key={excerpt.id}
+            />
+          ))}
+        </div>
+        {result.evidence_excerpts.length > 3 ? (
+          <button
+            className="show-more-button"
+            onClick={() => setShowAllExcerpts((currentValue) => !currentValue)}
+            type="button"
+          >
+            {showAllExcerpts ? "Show fewer excerpts" : "Show all excerpts"}
+          </button>
+        ) : null}
       </section>
     </article>
   );
@@ -465,7 +462,13 @@ function isMeaningfulSummaryTerm(term: EvidenceTerm) {
   return term.term === "uncertain" || term.term === "uncertainty";
 }
 
-function RiskFrameworkPanel({ result }: { result: AnalysisResult }) {
+function RiskFrameworkPanel({
+  groupedTerms,
+  result
+}: {
+  groupedTerms: Record<EvidenceCategory, EvidenceTerm[]>;
+  result: AnalysisResult;
+}) {
   const riskCategories = result.risk_categories ?? [];
   const sectionAnalyses = result.section_analyses ?? [];
 
@@ -476,7 +479,10 @@ function RiskFrameworkPanel({ result }: { result: AnalysisResult }) {
   return (
     <section className="framework-grid">
       <RiskCategoriesPanel categories={riskCategories} />
-      <SectionSignalsPanel sections={sectionAnalyses} />
+      <div className="framework-stack">
+        <SectionSignalsPanel sections={sectionAnalyses} />
+        <EvidenceTermsPanel groupedTerms={groupedTerms} />
+      </div>
     </section>
   );
 }

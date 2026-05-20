@@ -851,6 +851,13 @@ p {
   margin-top: 14px;
 }
 
+.framework-stack {
+  display: grid;
+  align-self: start;
+  gap: 14px;
+  min-width: 0;
+}
+
 .framework-panel {
   min-width: 0;
   padding: 14px;
@@ -1019,6 +1026,11 @@ p {
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 transparent;
+}
+
+.excerpts-panel-wide {
+  margin-top: 14px;
+  max-height: 680px;
 }
 
 .excerpts-panel::-webkit-scrollbar {
