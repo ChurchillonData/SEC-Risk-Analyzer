@@ -9,6 +9,11 @@ The project keeps a professional folder structure without overengineering. Each 
 - **Website:** [https://edgar-risklens.netlify.app](https://edgar-risklens.netlify.app)
 - **Backend health check:** [https://edgar-risklens-api.onrender.com/health](https://edgar-risklens-api.onrender.com/health)
 
+## Technical Documentation
+
+- **Technical report:** [docs/technical-report.md](docs/technical-report.md)
+- **Architecture notes:** [docs/architecture.md](docs/architecture.md)
+
 ## Screenshots
 
 **Dashboard**
