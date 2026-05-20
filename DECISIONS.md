@@ -20,11 +20,11 @@ It helps future readers understand why the project is built this way, what trade
 
 **Tradeoff:** The app depends on SEC availability and must respect SEC request limits. Raw filing caching can be added later if needed.
 
-## 3. Store Analysis Results In SQLite
+## 3. Store And Cache Analysis Results In SQLite
 
-**Decision:** SQLite stores the final analysis result, not the raw SEC filing documents.
+**Decision:** SQLite stores the final analysis result and lightweight risk-trend points, not the raw SEC filing documents.
 
-**Why:** SQLite proves the project has a real persistence layer while keeping setup simple. It avoids requiring Postgres or cloud infrastructure.
+**Why:** SQLite proves the project has a real persistence layer while keeping setup simple. It avoids requiring Postgres, Redis, or cloud infrastructure. It also lets the app reuse an analysis when the same SEC accession number has already been processed.
 
 **Stored Data Includes:**
 
@@ -33,9 +33,10 @@ It helps future readers understand why the project is built this way, what trade
 - accession number
 - filing date
 - full analysis JSON
+- risk-trend point JSON
 - analysis timestamp
 
-**Tradeoff:** SQLite is not ideal for multi-user production scale, but it is perfect for a focused MVP and GitHub portfolio project.
+**Tradeoff:** SQLite is not ideal for multi-user production scale, but it is perfect for a focused MVP and GitHub portfolio project. The app still checks SEC metadata first so it knows whether a newer filing exists before returning a cached result.
 
 ## 4. Keep A Minimal Layered Backend
 

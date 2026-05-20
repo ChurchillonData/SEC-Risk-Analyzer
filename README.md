@@ -30,7 +30,8 @@ The project keeps a professional folder structure without overengineering. Each 
 - Extracts supporting excerpts from the filing.
 - Highlights matched terms inside cited excerpts.
 - Adds a plain-English explanation.
-- Saves analysis results in SQLite.
+- Saves analysis results and reusable risk-trend points in SQLite.
+- Reuses cached results when the same SEC filing has already been analyzed.
 - Displays the output in a React frontend.
 - Lets users select 100 popular US, UK, European, and global companies from a searchable menu with ticker, sector, exchange, and logo.
 - Supports common US issuer forms (`8-K`, `10-Q`, `10-K`) and foreign issuer forms (`6-K`, `20-F`).
@@ -43,7 +44,7 @@ The project keeps a professional folder structure without overengineering. Each 
 - **NLP scoring:** finance-focused word lists for sentiment, risk, and uncertainty signals.
 - **Risk scoring + explainability:** per-1,000-word risk density, risk categories, cited excerpts, and section-level signals.
 - **Optional LLM explanations:** template explanations by default, with optional OpenAI support.
-- **SQLite storage:** lightweight persistence for completed analysis results.
+- **SQLite storage + caching:** lightweight persistence for completed analysis results and risk-trend points.
 - **Docker + CI:** reproducible local runs and automated checks.
 
 ## How The Scores Work

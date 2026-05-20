@@ -33,7 +33,16 @@ class FilingAnalysisService:
     def analyze_latest(self, ticker: str, form_type: FormType) -> AnalysisResult:
         """Fetch the filing, analyze it, explain it, and save the result."""
 
-        document = self.ingestor.fetch_latest(ticker, form_type)
+        metadata = self.ingestor.get_latest_metadata(ticker, form_type)
+        cached_result = self.store.get_analysis(
+            metadata.ticker,
+            metadata.form_type,
+            metadata.accession_number,
+        )
+        if cached_result:
+            return cached_result
+
+        document = self.ingestor.fetch_by_metadata(metadata)
         analysis = self.analyzer.analyze(
             document.clean_text,
             max_excerpts=self.max_evidence_excerpts,
@@ -70,31 +79,39 @@ class FilingAnalysisService:
     ) -> RiskTrendResponse:
         """Analyze recent filings and return lightweight chart points."""
 
-        documents = self.ingestor.fetch_recent(ticker, form_types, limit)
+        metadata_items = self.ingestor.get_recent_metadata(ticker, form_types, limit)
         points: list[RiskTrendPoint] = []
 
-        for document in documents:
+        for metadata in metadata_items:
+            cached_point = self.store.get_trend_point(
+                metadata.ticker,
+                metadata.form_type,
+                metadata.accession_number,
+            )
+            if cached_point:
+                points.append(cached_point)
+                continue
+
+            document = self.ingestor.fetch_by_metadata(metadata)
             analysis = self.analyzer.analyze(
                 document.clean_text,
                 max_excerpts=0,
                 sections=document.sections,
             )
-            metadata = document.metadata
-            points.append(
-                RiskTrendPoint(
-                    ticker=metadata.ticker,
-                    company_name=metadata.company_name,
-                    form_type=metadata.form_type,
-                    accession_number=metadata.accession_number,
-                    filed_at=metadata.filed_at,
-                    document_url=metadata.document_url,
-                    risk_score=analysis.risk_score,
-                    risk_level=analysis.risk_level,
-                    sentiment_label=analysis.sentiment_label,
-                    uncertainty_score=analysis.uncertainty_score,
-                    top_driver=self._top_risk_driver(analysis.risk_categories),
-                )
+            point = RiskTrendPoint(
+                ticker=metadata.ticker,
+                company_name=metadata.company_name,
+                form_type=metadata.form_type,
+                accession_number=metadata.accession_number,
+                filed_at=metadata.filed_at,
+                document_url=metadata.document_url,
+                risk_score=analysis.risk_score,
+                risk_level=analysis.risk_level,
+                sentiment_label=analysis.sentiment_label,
+                uncertainty_score=analysis.uncertainty_score,
+                top_driver=self._top_risk_driver(analysis.risk_categories),
             )
+            points.append(self.store.save_trend_point(point))
 
         points.sort(key=lambda point: point.filed_at)
         company_name = points[-1].company_name if points else None

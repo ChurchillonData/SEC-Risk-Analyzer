@@ -16,8 +16,13 @@ class FilingIngestor:
     def fetch_latest(self, ticker: str, form_type: FormType) -> FilingDocument:
         """Fetch, parse, and return the latest matching filing."""
 
-        metadata = self.sec_client.get_latest_filing(ticker, form_type)
+        metadata = self.get_latest_metadata(ticker, form_type)
         return self.fetch_by_metadata(metadata)
+
+    def get_latest_metadata(self, ticker: str, form_type: FormType) -> FilingMetadata:
+        """Return metadata for the latest matching filing without downloading it."""
+
+        return self.sec_client.get_latest_filing(ticker, form_type)
 
     def fetch_recent(
         self,
@@ -27,8 +32,18 @@ class FilingIngestor:
     ) -> list[FilingDocument]:
         """Fetch, parse, and return recent matching filings."""
 
-        metadata_items = self.sec_client.get_recent_filings(ticker, form_types, limit)
+        metadata_items = self.get_recent_metadata(ticker, form_types, limit)
         return [self.fetch_by_metadata(metadata) for metadata in metadata_items]
+
+    def get_recent_metadata(
+        self,
+        ticker: str,
+        form_types: list[FormType],
+        limit: int,
+    ) -> list[FilingMetadata]:
+        """Return recent matching filing metadata without downloading documents."""
+
+        return self.sec_client.get_recent_filings(ticker, form_types, limit)
 
     def fetch_by_metadata(self, metadata: FilingMetadata) -> FilingDocument:
         """Fetch and parse one filing already identified by metadata."""
