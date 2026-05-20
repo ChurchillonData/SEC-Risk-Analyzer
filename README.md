@@ -4,17 +4,6 @@ A focused full-stack project that analyzes public SEC filings for sentiment, unc
 
 The project keeps a professional folder structure without overengineering. Each backend folder has one clear job, and the code is meant to be readable for beginner-to-mid-level developers.
 
-## Frameworks Used
-
-- **FastAPI backend:** typed Python API for filing analysis requests.
-- **React + TypeScript frontend:** clean dashboard for selecting companies and reviewing results.
-- **SEC EDGAR ingestion:** live filing fetches from public SEC sources.
-- **NLP scoring:** finance-focused word lists for sentiment, risk, and uncertainty signals.
-- **Risk scoring + explainability:** per-1,000-word risk density, risk categories, cited excerpts, and section-level signals.
-- **Optional LLM explanations:** template explanations by default, with optional OpenAI support.
-- **SQLite storage:** lightweight persistence for completed analysis results.
-- **Docker + CI:** reproducible local runs and automated checks.
-
 ## What It Does
 
 - Fetches the latest SEC filing for a ticker.
@@ -30,6 +19,17 @@ The project keeps a professional folder structure without overengineering. Each 
 - Displays the output in a React frontend.
 - Lets users select 100 popular US, UK, European, and global companies from a searchable menu with ticker, sector, exchange, and logo.
 - Supports common US issuer forms (`8-K`, `10-Q`, `10-K`) and foreign issuer forms (`6-K`, `20-F`).
+
+## Frameworks Used
+
+- **FastAPI backend:** typed Python API for filing analysis requests.
+- **React + TypeScript frontend:** clean dashboard for selecting companies and reviewing results.
+- **SEC EDGAR ingestion:** live filing fetches from public SEC sources.
+- **NLP scoring:** finance-focused word lists for sentiment, risk, and uncertainty signals.
+- **Risk scoring + explainability:** per-1,000-word risk density, risk categories, cited excerpts, and section-level signals.
+- **Optional LLM explanations:** template explanations by default, with optional OpenAI support.
+- **SQLite storage:** lightweight persistence for completed analysis results.
+- **Docker + CI:** reproducible local runs and automated checks.
 
 ## How The Scores Work
 
