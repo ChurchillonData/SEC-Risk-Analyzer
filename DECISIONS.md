@@ -36,7 +36,7 @@ It helps future readers understand why the project is built this way, what trade
 - risk-trend point JSON
 - analysis timestamp
 
-**Tradeoff:** SQLite is not ideal for multi-user production scale, but it is perfect for a focused MVP and GitHub portfolio project. Precomputed snapshots favor reliability and speed for selected demo filing choices over checking SEC every time. Choices outside the snapshot still use the live SEC flow, and a future production version can move runtime cache data to persistent infrastructure.
+**Tradeoff:** SQLite is not ideal for multi-user production scale, but it is perfect for a focused MVP and GitHub portfolio project. Precomputed snapshots favor reliability and speed for selected demo filing choices over checking SEC every time. They do not stand in for recent-filing trend history, so the line chart still depends on live SEC trend data or saved trend points. Choices outside the snapshot still use the live SEC flow, and a future production version can move runtime cache data to persistent infrastructure.
 
 ## 4. Keep A Minimal Layered Backend
 

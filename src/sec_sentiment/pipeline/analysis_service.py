@@ -102,18 +102,14 @@ class FilingAnalysisService:
         """Analyze recent filings and return lightweight chart points."""
 
         normalized_ticker = ticker.upper().strip()
-        precomputed_points = self._precomputed_trend_points(
-            normalized_ticker,
-            form_types,
-            limit,
-        )
-        if precomputed_points:
-            return self._trend_response(normalized_ticker, precomputed_points)
 
         try:
             metadata_items = self.ingestor.get_recent_metadata(normalized_ticker, form_types, limit)
         except SECRateLimitError:
-            return self._cached_trend_response(normalized_ticker, form_types, limit)
+            fallback = self._cached_trend_response(normalized_ticker, form_types, limit)
+            if fallback.points:
+                return fallback
+            raise
 
         points: list[RiskTrendPoint] = []
 
@@ -186,18 +182,6 @@ class FilingAnalysisService:
         if self.precomputed_cache is None:
             return None
         return self.precomputed_cache.get_analysis(ticker, form_type)
-
-    def _precomputed_trend_points(
-        self,
-        ticker: str,
-        form_types: list[FormType],
-        limit: int,
-    ) -> list[RiskTrendPoint]:
-        """Return chart points built from committed public-demo results."""
-
-        if self.precomputed_cache is None:
-            return []
-        return self.precomputed_cache.get_trend_points(ticker, form_types, limit)
 
     def _trend_response(self, ticker: str, points: list[RiskTrendPoint]) -> RiskTrendResponse:
         """Return trend points in chronological order for the frontend chart."""

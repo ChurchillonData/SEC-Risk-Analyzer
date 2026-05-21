@@ -206,7 +206,7 @@ PRECOMPUTED_ANALYSES_PATH=data/precomputed_analyses.json
 
 `EXPLANATION_PROVIDER=template` works without an API key. Use `openai` only if you want the optional LLM explanation layer.
 
-The committed precomputed cache contains selected real filing analyses for popular demo choices. If a matching ticker and form type is present there, the backend returns it before making a live SEC request. Other choices still use SEC EDGAR live data and then store reusable results in SQLite.
+The committed precomputed cache contains selected real filing analyses for popular demo choices. If a matching ticker and form type is present there, the backend returns it before making a live SEC request. The risk trend chart still uses recent-filing trend data from the live SEC flow or saved trend points, so report snapshots do not change what the line chart means. Other choices still use SEC EDGAR live data and then store reusable results in SQLite.
 
 ## Tests
 
