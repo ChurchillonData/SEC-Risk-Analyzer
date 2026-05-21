@@ -18,7 +18,7 @@ from sec_sentiment.models import (
 from sec_sentiment.nlp import FinancialTextAnalyzer
 from sec_sentiment.parsing import FilingParser
 from sec_sentiment.pipeline import FilingAnalysisService
-from sec_sentiment.storage import AnalysisStore
+from sec_sentiment.storage import AnalysisStore, PrecomputedAnalysisCache
 
 router = APIRouter()
 
@@ -34,12 +34,14 @@ def get_analysis_service() -> FilingAnalysisService:
     analyzer = FinancialTextAnalyzer()
     explainer = FilingExplainer(settings)
     store = AnalysisStore(settings.sqlite_path)
+    precomputed_cache = PrecomputedAnalysisCache(settings.precomputed_analyses_path)
     return FilingAnalysisService(
         ingestor=ingestor,
         analyzer=analyzer,
         explainer=explainer,
         store=store,
         max_evidence_excerpts=settings.llm_max_evidence_excerpts,
+        precomputed_cache=precomputed_cache,
     )
 
 

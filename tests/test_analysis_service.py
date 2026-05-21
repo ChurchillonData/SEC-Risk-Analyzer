@@ -65,6 +65,22 @@ def test_analyze_latest_returns_saved_result_during_sec_rate_limit(tmp_path) -> 
     assert result.company_name == "Microsoft Corporation"
 
 
+def test_analyze_latest_returns_precomputed_result_before_sec_fetch(tmp_path) -> None:
+    saved_result = build_saved_result()
+    service = FilingAnalysisService(
+        ingestor=UnusedIngestor(),
+        analyzer=FinancialTextAnalyzer(),
+        explainer=FakeExplainer(),
+        store=AnalysisStore(str(tmp_path / "analysis.db")),
+        max_evidence_excerpts=4,
+        precomputed_cache=FakePrecomputedCache(saved_result),
+    )
+
+    result = service.analyze_latest("MSFT", "10-K")
+
+    assert result.accession_number == saved_result.accession_number
+
+
 class FakeIngestor:
     def __init__(self) -> None:
         self.download_count = 0
@@ -86,6 +102,19 @@ class FakeIngestor:
 class RateLimitedIngestor:
     def get_latest_metadata(self, ticker, form_type):
         raise SECRateLimitError("SEC is temporarily rate-limiting live filing requests.")
+
+
+class UnusedIngestor:
+    def get_latest_metadata(self, ticker, form_type):
+        raise AssertionError("Precomputed analysis should avoid the live SEC fetch.")
+
+
+class FakePrecomputedCache:
+    def __init__(self, result):
+        self.result = result
+
+    def get_analysis(self, ticker, form_type):
+        return self.result
 
 
 class FakeExplainer:

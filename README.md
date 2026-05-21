@@ -45,6 +45,7 @@ The project keeps a professional folder structure without overengineering. Each 
 - Adds a plain-English explanation.
 - Saves analysis results and reusable risk-trend points in SQLite.
 - Reuses cached results when the same SEC filing has already been analyzed.
+- Serves selected precomputed filing snapshots before live SEC calls so the public demo stays useful during SEC throttling.
 - Displays the output in a React frontend.
 - Lets users select 100 popular US, UK, European, and global companies from a searchable menu with ticker, sector, exchange, and logo.
 - Supports common US issuer forms (`8-K`, `10-Q`, `10-K`) and foreign issuer forms (`6-K`, `20-F`).
@@ -58,6 +59,7 @@ The project keeps a professional folder structure without overengineering. Each 
 - **Risk scoring + explainability:** per-1,000-word risk density, risk categories, cited excerpts, and section-level signals.
 - **Optional LLM explanations:** template explanations by default, with optional OpenAI support.
 - **SQLite storage + caching:** lightweight persistence for completed analysis results, risk-trend points, and rate-limit fallbacks.
+- **Precomputed demo cache:** a small JSON snapshot of selected popular filing analyses for public traffic.
 - **Docker + CI:** reproducible local runs and automated checks.
 
 ## How The Scores Work
@@ -103,7 +105,9 @@ flowchart LR
 ```text
 .
 |-- .github/workflows/ci.yml
-|-- data/.gitkeep
+|-- data/
+|   |-- .gitkeep
+|   `-- precomputed_analyses.json
 |-- docs/architecture.md
 |-- frontend/
 |   |-- public/flags/
@@ -197,9 +201,12 @@ EXPLANATION_PROVIDER=template
 OPENAI_API_KEY=
 OPENAI_MODEL=gpt-4.1-mini
 SQLITE_PATH=data/sec_sentiment.db
+PRECOMPUTED_ANALYSES_PATH=data/precomputed_analyses.json
 ```
 
 `EXPLANATION_PROVIDER=template` works without an API key. Use `openai` only if you want the optional LLM explanation layer.
+
+The committed precomputed cache contains selected real filing analyses for popular demo choices. If a matching ticker and form type is present there, the backend returns it before making a live SEC request. Other choices still use SEC EDGAR live data and then store reusable results in SQLite.
 
 ## Tests
 

@@ -20,11 +20,11 @@ It helps future readers understand why the project is built this way, what trade
 
 **Tradeoff:** The app depends on SEC availability and must respect SEC request limits. The backend now retries temporary `429` responses, caches filing metadata in memory, and can return a saved SQLite result when SEC is temporarily throttling live requests.
 
-## 3. Store And Cache Analysis Results In SQLite
+## 3. Cache Analysis Results For Public Traffic
 
-**Decision:** SQLite stores the final analysis result and lightweight risk-trend points, not the raw SEC filing documents.
+**Decision:** SQLite stores the final analysis result and lightweight risk-trend points, not the raw SEC filing documents. A small committed JSON cache stores selected real precomputed results for popular demo filings.
 
-**Why:** SQLite proves the project has a real persistence layer while keeping setup simple. It avoids requiring Postgres, Redis, or cloud infrastructure. It also lets the app reuse an analysis when the same SEC accession number has already been processed.
+**Why:** SQLite proves the project has a real persistence layer while keeping setup simple. It avoids requiring Postgres, Redis, or cloud infrastructure. It also lets the app reuse an analysis when the same SEC accession number has already been processed. The committed JSON snapshots keep the public website useful when a new Render instance has an empty SQLite file or SEC is throttling live traffic.
 
 **Stored Data Includes:**
 
@@ -36,7 +36,7 @@ It helps future readers understand why the project is built this way, what trade
 - risk-trend point JSON
 - analysis timestamp
 
-**Tradeoff:** SQLite is not ideal for multi-user production scale, but it is perfect for a focused MVP and GitHub portfolio project. The app normally checks SEC metadata first so it knows whether a newer filing exists, but it can fall back to the most recent saved result if SEC rate-limits the live check.
+**Tradeoff:** SQLite is not ideal for multi-user production scale, but it is perfect for a focused MVP and GitHub portfolio project. Precomputed snapshots favor reliability and speed for selected demo filing choices over checking SEC every time. Choices outside the snapshot still use the live SEC flow, and a future production version can move runtime cache data to persistent infrastructure.
 
 ## 4. Keep A Minimal Layered Backend
 

@@ -1,7 +1,8 @@
+import json
 from datetime import date
 
 from sec_sentiment.models import AnalysisResult, RiskTrendPoint
-from sec_sentiment.storage import AnalysisStore
+from sec_sentiment.storage import AnalysisStore, PrecomputedAnalysisCache
 
 
 def test_analysis_store_saves_result(tmp_path) -> None:
@@ -55,6 +56,22 @@ def test_analysis_store_saves_and_returns_trend_point(tmp_path) -> None:
     cached = store.get_trend_point("AAPL", "10-K", "0000320193-26-000002")
 
     assert cached == point
+
+
+def test_precomputed_cache_returns_a_saved_snapshot(tmp_path) -> None:
+    result = build_result()
+    snapshot_path = tmp_path / "precomputed.json"
+    snapshot_path.write_text(
+        json.dumps({"analyses": [result.model_dump(mode="json")]}),
+        encoding="utf-8",
+    )
+
+    cache = PrecomputedAnalysisCache(str(snapshot_path))
+    cached = cache.get_analysis("aapl", "8-K")
+
+    assert cached is not None
+    assert cached.accession_number == result.accession_number
+    assert cached.filed_at == result.filed_at
 
 
 def build_result(

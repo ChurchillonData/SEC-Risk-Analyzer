@@ -39,6 +39,7 @@ class Settings(BaseSettings):
     sec_rate_limit_retry_seconds: float = 2.0
 
     sqlite_path: str = "data/sec_sentiment.db"
+    precomputed_analyses_path: str = "data/precomputed_analyses.json"
     max_filing_chars: int = 1_000_000
 
     explanation_provider: Literal["none", "template", "openai"] = "template"

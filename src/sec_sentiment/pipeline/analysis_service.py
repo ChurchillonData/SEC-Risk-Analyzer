@@ -11,7 +11,7 @@ from sec_sentiment.models import (
     RiskTrendResponse,
 )
 from sec_sentiment.nlp import FinancialTextAnalyzer
-from sec_sentiment.storage import AnalysisStore
+from sec_sentiment.storage import AnalysisStore, PrecomputedAnalysisCache
 
 
 class FilingAnalysisService:
@@ -24,17 +24,22 @@ class FilingAnalysisService:
         explainer: FilingExplainer,
         store: AnalysisStore,
         max_evidence_excerpts: int,
+        precomputed_cache: PrecomputedAnalysisCache | None = None,
     ) -> None:
         self.ingestor = ingestor
         self.analyzer = analyzer
         self.explainer = explainer
         self.store = store
         self.max_evidence_excerpts = max_evidence_excerpts
+        self.precomputed_cache = precomputed_cache
 
     def analyze_latest(self, ticker: str, form_type: FormType) -> AnalysisResult:
         """Fetch the filing, analyze it, explain it, and save the result."""
 
         normalized_ticker = ticker.upper().strip()
+        precomputed_result = self._precomputed_analysis(normalized_ticker, form_type)
+        if precomputed_result:
+            return precomputed_result
 
         try:
             metadata = self.ingestor.get_latest_metadata(normalized_ticker, form_type)
@@ -97,6 +102,13 @@ class FilingAnalysisService:
         """Analyze recent filings and return lightweight chart points."""
 
         normalized_ticker = ticker.upper().strip()
+        precomputed_points = self._precomputed_trend_points(
+            normalized_ticker,
+            form_types,
+            limit,
+        )
+        if precomputed_points:
+            return self._trend_response(normalized_ticker, precomputed_points)
 
         try:
             metadata_items = self.ingestor.get_recent_metadata(normalized_ticker, form_types, limit)
@@ -163,6 +175,29 @@ class FilingAnalysisService:
 
         points = self.store.get_recent_trend_points(ticker, form_types, limit)
         return self._trend_response(ticker, points)
+
+    def _precomputed_analysis(
+        self,
+        ticker: str,
+        form_type: FormType,
+    ) -> AnalysisResult | None:
+        """Return a ready public-demo result when one is committed."""
+
+        if self.precomputed_cache is None:
+            return None
+        return self.precomputed_cache.get_analysis(ticker, form_type)
+
+    def _precomputed_trend_points(
+        self,
+        ticker: str,
+        form_types: list[FormType],
+        limit: int,
+    ) -> list[RiskTrendPoint]:
+        """Return chart points built from committed public-demo results."""
+
+        if self.precomputed_cache is None:
+            return []
+        return self.precomputed_cache.get_trend_points(ticker, form_types, limit)
 
     def _trend_response(self, ticker: str, points: list[RiskTrendPoint]) -> RiskTrendResponse:
         """Return trend points in chronological order for the frontend chart."""
