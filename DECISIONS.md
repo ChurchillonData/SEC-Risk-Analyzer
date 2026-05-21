@@ -18,7 +18,7 @@ It helps future readers understand why the project is built this way, what trade
 
 **Why:** This keeps the project easy to run. A user only needs to enter a ticker and form type.
 
-**Tradeoff:** The app depends on SEC availability and must respect SEC request limits. Raw filing caching can be added later if needed.
+**Tradeoff:** The app depends on SEC availability and must respect SEC request limits. The backend now retries temporary `429` responses, caches filing metadata in memory, and can return a saved SQLite result when SEC is temporarily throttling live requests.
 
 ## 3. Store And Cache Analysis Results In SQLite
 
@@ -36,7 +36,7 @@ It helps future readers understand why the project is built this way, what trade
 - risk-trend point JSON
 - analysis timestamp
 
-**Tradeoff:** SQLite is not ideal for multi-user production scale, but it is perfect for a focused MVP and GitHub portfolio project. The app still checks SEC metadata first so it knows whether a newer filing exists before returning a cached result.
+**Tradeoff:** SQLite is not ideal for multi-user production scale, but it is perfect for a focused MVP and GitHub portfolio project. The app normally checks SEC metadata first so it knows whether a newer filing exists, but it can fall back to the most recent saved result if SEC rate-limits the live check.
 
 ## 4. Keep A Minimal Layered Backend
 

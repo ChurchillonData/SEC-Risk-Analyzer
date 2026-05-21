@@ -57,7 +57,7 @@ The project keeps a professional folder structure without overengineering. Each 
 - **NLP scoring:** finance-focused word lists for sentiment, risk, and uncertainty signals.
 - **Risk scoring + explainability:** per-1,000-word risk density, risk categories, cited excerpts, and section-level signals.
 - **Optional LLM explanations:** template explanations by default, with optional OpenAI support.
-- **SQLite storage + caching:** lightweight persistence for completed analysis results and risk-trend points.
+- **SQLite storage + caching:** lightweight persistence for completed analysis results, risk-trend points, and rate-limit fallbacks.
 - **Docker + CI:** reproducible local runs and automated checks.
 
 ## How The Scores Work
@@ -190,6 +190,9 @@ Backend:  http://localhost:8000
 
 ```env
 SEC_USER_AGENT="Your Name your.email@example.com"
+SEC_METADATA_CACHE_SECONDS=21600
+SEC_RATE_LIMIT_RETRIES=2
+SEC_RATE_LIMIT_RETRY_SECONDS=2
 EXPLANATION_PROVIDER=template
 OPENAI_API_KEY=
 OPENAI_MODEL=gpt-4.1-mini

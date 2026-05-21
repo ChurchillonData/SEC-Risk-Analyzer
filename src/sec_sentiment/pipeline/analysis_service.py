@@ -1,5 +1,6 @@
 """End-to-end service for analyzing the latest SEC filing."""
 
+from sec_sentiment.errors import SECRateLimitError
 from sec_sentiment.ingestion import FilingIngestor
 from sec_sentiment.llm import FilingExplainer
 from sec_sentiment.models import (
@@ -33,7 +34,16 @@ class FilingAnalysisService:
     def analyze_latest(self, ticker: str, form_type: FormType) -> AnalysisResult:
         """Fetch the filing, analyze it, explain it, and save the result."""
 
-        metadata = self.ingestor.get_latest_metadata(ticker, form_type)
+        normalized_ticker = ticker.upper().strip()
+
+        try:
+            metadata = self.ingestor.get_latest_metadata(normalized_ticker, form_type)
+        except SECRateLimitError:
+            cached_result = self.store.get_latest_analysis(normalized_ticker, form_type)
+            if cached_result:
+                return cached_result
+            raise
+
         cached_result = self.store.get_analysis(
             metadata.ticker,
             metadata.form_type,
@@ -42,7 +52,14 @@ class FilingAnalysisService:
         if cached_result:
             return cached_result
 
-        document = self.ingestor.fetch_by_metadata(metadata)
+        try:
+            document = self.ingestor.fetch_by_metadata(metadata)
+        except SECRateLimitError:
+            cached_result = self.store.get_latest_analysis(normalized_ticker, form_type)
+            if cached_result:
+                return cached_result
+            raise
+
         analysis = self.analyzer.analyze(
             document.clean_text,
             max_excerpts=self.max_evidence_excerpts,
@@ -79,7 +96,13 @@ class FilingAnalysisService:
     ) -> RiskTrendResponse:
         """Analyze recent filings and return lightweight chart points."""
 
-        metadata_items = self.ingestor.get_recent_metadata(ticker, form_types, limit)
+        normalized_ticker = ticker.upper().strip()
+
+        try:
+            metadata_items = self.ingestor.get_recent_metadata(normalized_ticker, form_types, limit)
+        except SECRateLimitError:
+            return self._cached_trend_response(normalized_ticker, form_types, limit)
+
         points: list[RiskTrendPoint] = []
 
         for metadata in metadata_items:
@@ -92,7 +115,14 @@ class FilingAnalysisService:
                 points.append(cached_point)
                 continue
 
-            document = self.ingestor.fetch_by_metadata(metadata)
+            try:
+                document = self.ingestor.fetch_by_metadata(metadata)
+            except SECRateLimitError:
+                fallback = self._cached_trend_response(normalized_ticker, form_types, limit)
+                if fallback.points:
+                    return fallback
+                raise
+
             analysis = self.analyzer.analyze(
                 document.clean_text,
                 max_excerpts=0,
@@ -113,13 +143,7 @@ class FilingAnalysisService:
             )
             points.append(self.store.save_trend_point(point))
 
-        points.sort(key=lambda point: point.filed_at)
-        company_name = points[-1].company_name if points else None
-        return RiskTrendResponse(
-            ticker=ticker.upper().strip(),
-            company_name=company_name,
-            points=points,
-        )
+        return self._trend_response(normalized_ticker, points)
 
     def _top_risk_driver(self, categories: list[RiskCategoryScore]) -> str | None:
         """Return the strongest non-zero risk category label for chart tooltips."""
@@ -128,3 +152,25 @@ class FilingAnalysisService:
             if category.score > 0:
                 return category.label
         return None
+
+    def _cached_trend_response(
+        self,
+        ticker: str,
+        form_types: list[FormType],
+        limit: int,
+    ) -> RiskTrendResponse:
+        """Return saved trend points during temporary SEC rate limits."""
+
+        points = self.store.get_recent_trend_points(ticker, form_types, limit)
+        return self._trend_response(ticker, points)
+
+    def _trend_response(self, ticker: str, points: list[RiskTrendPoint]) -> RiskTrendResponse:
+        """Return trend points in chronological order for the frontend chart."""
+
+        points.sort(key=lambda point: point.filed_at)
+        company_name = points[-1].company_name if points else None
+        return RiskTrendResponse(
+            ticker=ticker.upper().strip(),
+            company_name=company_name,
+            points=points,
+        )

@@ -6,6 +6,7 @@ from fastapi import APIRouter, HTTPException, status
 
 from sec_sentiment.clients import SECClient
 from sec_sentiment.config import get_settings
+from sec_sentiment.errors import SECRateLimitError
 from sec_sentiment.ingestion import FilingIngestor
 from sec_sentiment.llm import FilingExplainer
 from sec_sentiment.models import (
@@ -57,6 +58,11 @@ def analyze_filing(request: AnalysisRequest) -> AnalysisResult:
         return get_analysis_service().analyze_latest(request.ticker, request.form_type)
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except SECRateLimitError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=str(exc),
+        ) from exc
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
@@ -76,6 +82,11 @@ def analyze_risk_trend(request: RiskTrendRequest) -> RiskTrendResponse:
         )
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except SECRateLimitError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=str(exc),
+        ) from exc
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,

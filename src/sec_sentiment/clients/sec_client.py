@@ -9,6 +9,7 @@ from typing import Any, cast
 import httpx
 
 from sec_sentiment.config import Settings
+from sec_sentiment.errors import SECRateLimitError
 from sec_sentiment.models import FilingMetadata, FormType
 
 
@@ -19,6 +20,10 @@ class SECClient:
         self.settings = settings
         self._last_request_at = 0.0
         self._ticker_cache: dict[str, Any] | None = None
+        self._recent_filings_cache: dict[
+            tuple[str, tuple[FormType, ...], int],
+            tuple[float, list[FilingMetadata]],
+        ] = {}
         self._client = httpx.Client(
             timeout=settings.request_timeout_seconds,
             follow_redirects=True,
@@ -44,6 +49,12 @@ class SECClient:
         limit: int,
     ) -> list[FilingMetadata]:
         """Return recent filing metadata for one ticker and a small set of forms."""
+
+        normalized_ticker = ticker.upper().strip()
+        cache_key = (normalized_ticker, tuple(form_types), limit)
+        cached_filings = self._get_cached_recent_filings(cache_key)
+        if cached_filings is not None:
+            return cached_filings
 
         cik, company_name = self.get_cik_for_ticker(ticker)
         submissions = self._get_json(
@@ -75,6 +86,7 @@ class SECClient:
             )
 
             if len(filings) >= limit:
+                self._cache_recent_filings(cache_key, filings)
                 return filings
 
         forms = ", ".join(form_types)
@@ -125,13 +137,24 @@ class SECClient:
         return self._request(url).text
 
     def _request(self, url: str) -> httpx.Response:
-        self._wait_between_sec_requests()
-        response = self._client.get(url)
+        for attempt in range(self.settings.sec_rate_limit_retries + 1):
+            self._wait_between_sec_requests()
+            response = self._client.get(url)
+
+            if response.status_code != 429:
+                break
+
+            if attempt < self.settings.sec_rate_limit_retries:
+                time.sleep(self.settings.sec_rate_limit_retry_seconds * (attempt + 1))
+                continue
+
+            raise SECRateLimitError(
+                "SEC is temporarily rate-limiting live filing requests. "
+                "Try again in a few minutes."
+            )
 
         if response.status_code == 404:
             raise ValueError(f"SEC resource not found: {url}")
-        if response.status_code == 429:
-            raise RuntimeError("SEC rate limit reached. Wait and try again.")
 
         response.raise_for_status()
         return response
@@ -142,3 +165,25 @@ class SECClient:
         if wait_time > 0:
             time.sleep(wait_time)
         self._last_request_at = time.monotonic()
+
+    def _get_cached_recent_filings(
+        self,
+        cache_key: tuple[str, tuple[FormType, ...], int],
+    ) -> list[FilingMetadata] | None:
+        cached = self._recent_filings_cache.get(cache_key)
+        if cached is None:
+            return None
+
+        cached_at, filings = cached
+        cache_age = time.monotonic() - cached_at
+        if cache_age > self.settings.sec_metadata_cache_seconds:
+            return None
+
+        return list(filings)
+
+    def _cache_recent_filings(
+        self,
+        cache_key: tuple[str, tuple[FormType, ...], int],
+        filings: list[FilingMetadata],
+    ) -> None:
+        self._recent_filings_cache[cache_key] = (time.monotonic(), list(filings))

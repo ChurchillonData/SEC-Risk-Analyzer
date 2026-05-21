@@ -23,6 +23,18 @@ def test_analysis_store_returns_cached_result(tmp_path) -> None:
     assert cached.company_name == "Apple Inc."
 
 
+def test_analysis_store_returns_latest_analysis_for_form(tmp_path) -> None:
+    store = AnalysisStore(str(tmp_path / "analysis.db"))
+    store.save(build_result(accession="older", filed_at=date(2025, 5, 1)))
+    latest = store.save(build_result(accession="newer", filed_at=date(2026, 5, 1)))
+
+    cached = store.get_latest_analysis("AAPL", "8-K")
+
+    assert cached is not None
+    assert cached.id == latest.id
+    assert cached.accession_number == "newer"
+
+
 def test_analysis_store_saves_and_returns_trend_point(tmp_path) -> None:
     store = AnalysisStore(str(tmp_path / "analysis.db"))
     point = RiskTrendPoint(
@@ -45,14 +57,17 @@ def test_analysis_store_saves_and_returns_trend_point(tmp_path) -> None:
     assert cached == point
 
 
-def build_result() -> AnalysisResult:
+def build_result(
+    accession: str = "0000320193-26-000001",
+    filed_at: date = date(2026, 5, 1),
+) -> AnalysisResult:
     return AnalysisResult(
         ticker="AAPL",
         cik="320193",
         company_name="Apple Inc.",
         form_type="8-K",
-        accession_number="0000320193-26-000001",
-        filed_at=date(2026, 5, 1),
+        accession_number=accession,
+        filed_at=filed_at,
         document_url="https://www.sec.gov/example",
         sentiment_label="neutral",
         sentiment_score=0.0,

@@ -72,6 +72,28 @@ class AnalysisStore:
         result = AnalysisResult.model_validate_json(row[1])
         return result.model_copy(update={"id": row[0]})
 
+    def get_latest_analysis(self, ticker: str, form_type: FormType) -> AnalysisResult | None:
+        """Return the most recent saved analysis for a ticker and form type."""
+
+        with sqlite3.connect(self.db_path) as connection:
+            row = connection.execute(
+                """
+                SELECT id, result_json
+                FROM analyses
+                WHERE ticker = ?
+                  AND form_type = ?
+                ORDER BY filed_at DESC, analyzed_at DESC
+                LIMIT 1
+                """,
+                (ticker.upper().strip(), form_type),
+            ).fetchone()
+
+        if row is None:
+            return None
+
+        result = AnalysisResult.model_validate_json(row[1])
+        return result.model_copy(update={"id": row[0]})
+
     def save_trend_point(self, point: RiskTrendPoint) -> RiskTrendPoint:
         """Store one lightweight point used by the risk trend chart."""
 
@@ -129,6 +151,35 @@ class AnalysisStore:
             return None
 
         return RiskTrendPoint.model_validate_json(row[0])
+
+    def get_recent_trend_points(
+        self,
+        ticker: str,
+        form_types: list[FormType],
+        limit: int,
+    ) -> list[RiskTrendPoint]:
+        """Return saved trend points when live SEC trend fetching is unavailable."""
+
+        if not form_types:
+            return []
+
+        placeholders = ", ".join("?" for _ in form_types)
+        parameters: list[str | int] = [ticker.upper().strip(), *form_types, limit]
+
+        with sqlite3.connect(self.db_path) as connection:
+            rows = connection.execute(
+                f"""
+                SELECT point_json
+                FROM trend_points
+                WHERE ticker = ?
+                  AND form_type IN ({placeholders})
+                ORDER BY filed_at DESC
+                LIMIT ?
+                """,
+                parameters,
+            ).fetchall()
+
+        return [RiskTrendPoint.model_validate_json(row[0]) for row in rows]
 
     def _create_table(self) -> None:
         with sqlite3.connect(self.db_path) as connection:

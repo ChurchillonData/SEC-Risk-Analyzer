@@ -34,6 +34,9 @@ class Settings(BaseSettings):
     sec_www_base_url: str = "https://www.sec.gov"
     request_timeout_seconds: float = 20.0
     min_sec_request_interval_seconds: float = 0.15
+    sec_metadata_cache_seconds: float = 21_600.0
+    sec_rate_limit_retries: int = 2
+    sec_rate_limit_retry_seconds: float = 2.0
 
     sqlite_path: str = "data/sec_sentiment.db"
     max_filing_chars: int = 1_000_000
